@@ -7,6 +7,7 @@ import AppBar from '@material-ui/core/AppBar';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import CardActions from '@material-ui/core/CardActions';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import InputBase from '@material-ui/core/InputBase';
@@ -64,48 +65,74 @@ class Search extends Component {
     }
 
     fetchTranslation(value) {
-        console.log(this.state);
         const input = value;
         const sourceLanguage = this.state.sourceLanguage;
         const translatedLanguage = this.state.translatedLanguage;
-        if (sourceLanguage !== "" && sourceLanguage !== null && sourceLanguage !== undefined) {
-            if (translatedLanguage !== "" && translatedLanguage !== null && translatedLanguage !== undefined) {
-                if (sourceLanguage !== translatedLanguage) {
-                    this.setState({
-                        sourceText: input,
-                        sourceLength: input.length
-                    });
-
-                    if (input !== "" && input !== null && input !== undefined) {
-                        getTranslation(input, sourceLanguage, translatedLanguage)
-                            .then(data => {
-                                this.setState({
-                                    translatedText: data.matches[0].translation,
-                                    translatedLength: data.matches[0].translation.length
-                                });
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            });
-                    } else {
+        if(this.state.sourceLanguage !== "auto-detect"){
+            if (this.hasValue(sourceLanguage)) {
+                if (this.hasValue(translatedLanguage)) {
+                    if (sourceLanguage !== translatedLanguage) {
                         this.setState({
-                            translatedText: '',
-                            translatedLength: 0
+                            sourceText: input,
+                            sourceLength: input.length
                         });
+
+                        if (this.hasValue(input)) {
+                            getTranslation(input, sourceLanguage, translatedLanguage)
+                                .then(data => {
+                                    this.setState({
+                                        translatedText: data.matches[0].translation,
+                                        translatedLength: data.matches[0].translation.length
+                                    });
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                });
+                        } else {
+                            this.setState({
+                                translatedText: '',
+                                translatedLength: 0
+                            });
+                        }
+                    }
+                    else {
+                        console.log("Please select two distinct languages!");
                     }
                 }
                 else {
-                    console.log("Please select two distinct languages!");
+                    console.log("Translated language can't be null!");
                 }
             }
             else {
-                console.log("Translated language can't be null!");
+                console.log("Source language can't be null!");
             }
+        }   
+        else{
+            this.setState({
+                sourceLanguage: ''
+            },() => {
+                if (this.hasValue(input)) {
+                    getTranslation(input, this.state.sourceLanguage, translatedLanguage)
+                        .then(data => {
+                            this.setState({
+                                translatedText: data.matches[0].translation,
+                                translatedLength: data.matches[0].translation.length
+                            });
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                } else {
+                    this.setState({
+                        translatedText: '',
+                        translatedLength: 0
+                    });
+                }
+                this.setState({
+                    sourceLanguage: 'auto-detect'
+                });
+            });
         }
-        else {
-            console.log("Source language can't be null!");
-        }
-
     }
 
     swapHandler() {
@@ -122,8 +149,8 @@ class Search extends Component {
         sourceLanguage = translatedLanguage;
         translatedLanguage = temp;
 
-        this.sInputRef.value = sourceText;
-
+        // this.sInputRef.value = sourceText;
+        
         this.setState({
             sourceLanguage: sourceLanguage,
             translatedLanguage: translatedLanguage,
@@ -133,24 +160,31 @@ class Search extends Component {
     }
 
     handleSourceChange(value) {
-        this.setState({ sourceLanguage: value },() => {
-            this.fetchTranslation(this.state.sourceText);
+        this.setState({ sourceLanguage: value 
         });
         
     }
 
     handleTranslatedChange(value) {
-        this.setState({ translatedLanguage: value },() => {
-            this.fetchTranslation(this.state.sourceText);
+        this.setState({ translatedLanguage: value });
+    }
+
+    setSourceText(event) {
+        this.setState({
+            sourceText: event.target.value,
+            sourceLength: event.target.value.length
         });
     }
 
-    setSourceLanguage(event) {
-        this.setState({
-            sourceText: event.target.value
-        });
-    }
-    
+    hasValue = (item) => {
+        return ((item !== null) && (item !== '') && (item !== undefined));
+    };
+
+    // autoDetectHandler(){
+    //     this.setState({
+    //         sourceLanguage: ' '
+    //     });
+    // }
     // componentDidUpdate(prevProps, prevState) {
     //     console.log(this.props);
     //     // console.log(prevProps.match.params.query,this.props.match.params.query);
@@ -203,10 +237,22 @@ class Search extends Component {
                     multiline
                     rows="3"
                     inputProps={{ 'aria-label': 'naked' }}
-                    inputRef={sInputRef =>  this.sInputRef = sInputRef }
-                    onChange={(event) => this.setSourceLanguage(event)}
-                    style={{width: '100%',display: 'inline-block'}}/>
+                    value={this.state.sourceText}
+                    onChange={(event) => {
+                            if(event.target.value.length<=500){
+                                this.setSourceText(event);
+                            }}}
+                    style={{width: '100%'}}/>
+                    <Typography variant="h6" style={{position: 'relative',
+                                                    fontSize: '12px',
+                                                    textAlign: 'right'
+                    }}>
+                        {this.state.sourceText.length}/500
+                    </Typography>
             </CardContent>
+            <CardActions>
+                
+            </CardActions>
         </Card>;
 
         let translatedCard = <Card className={classes.card} style={{ marginTop: '2px' }}>
@@ -254,7 +300,7 @@ class Search extends Component {
                         width: "100%",
                         textAlign: 'center'
                     }}>
-                        Translator
+                        Translator  
                     </Typography>
                 </AppBar>
                 <Paper className={classes.root}>
