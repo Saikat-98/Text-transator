@@ -3,7 +3,7 @@ import { getTranslation } from '../serviceClass';
 import { isoCodes } from './isoStandardLanguageCodes'
 
 import Typography from '@material-ui/core/Typography';
-// import AppBar from '@material-ui/core/AppBar';
+import AppBar from '@material-ui/core/AppBar';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -365,6 +365,10 @@ class Search extends Component {
                             this.setSourceText(event);
                         }
                     }}
+                    onKeyPress={(event) => {
+                        if(event.key === "Enter")
+                            this.fetchTranslation(this.state.sourceText);
+                    }}
                     style={{ width: '100%',padding: '0px'}} />
                 <Typography className={classes.mediaQueryFontSizeWordCount} variant="h6" style={{
                     display: 'inline-block',
@@ -448,33 +452,33 @@ class Search extends Component {
 
         return (
                 <Paper style={{ width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* <AppBar style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#444444',
-                    width: '100%',
-                    padding: '16px 5px'
-                }}>
-                    <Typography variant="h4" style={{
-                        width: "100%",
-                        textAlign: 'center'
+                    <AppBar style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#444444',
+                        width: '100%',
+                        padding: '16px 5px'
                     }}>
-                        Translator
-                    </Typography>
-                </AppBar> */}
-                <Grid container justify="center" spacing={0} alignItems="center" className={classes.root}>
-                    <Grid item xs={12} lg={6} style={{ height: 'fit-content'}}>
-                        {sourceCard}
+                        <Typography variant="h4" style={{
+                            width: "100%",
+                            textAlign: 'center'
+                        }}>
+                            Translator
+                        </Typography>
+                    </AppBar>
+                    <Grid container justify="center" spacing={0} alignItems="center" className={classes.root}>
+                        <Grid item xs={12} lg={6} style={{ height: 'fit-content'}}>
+                            {sourceCard}
+                        </Grid>
+                        {
+                            this.props.width === "lg" ? swapButtonLaptop : swapButtonMobile
+                        }
+                        <Grid item xs={12} lg={6} style={{ height: 'fit-content' }}>
+                            {translatedCard}
+                        </Grid>
                     </Grid>
-                    {
-                        this.props.width === "lg" ? swapButtonLaptop : swapButtonMobile
-                    }
-                    <Grid item xs={12} lg={6} style={{ height: 'fit-content' }}>
-                        {translatedCard}
-                    </Grid>
-                </Grid>
-            </Paper>            
+                </Paper>            
         )
     }
 }
